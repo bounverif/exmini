@@ -57,6 +57,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           platforms: linux/amd64
+          context: ./containers
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ env.ESMINI_VERSION }}-builder latest-builder
           layers: true
@@ -67,7 +68,7 @@ jobs:
           extra-args: |
             --target esmini-builder
           containerfiles: |
-            containers/esmini-builder/Dockerfile
+            ./containers/esmini-builder/Dockerfile
 
       - name: Push to GitHub Container Repository
         if: github.ref == 'refs/heads/main'
