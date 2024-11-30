@@ -63,7 +63,7 @@ jobs:
           layers: true
           oci: true
           build-args: |
-            ESMINI_IMAGE_NAME=${{env.REGISTRY}}}/${{ env.IMAGE_NAME }}
+            ESMINI_IMAGE_NAME=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
             ESMINI_VERSION=${{ env.ESMINI_VERSION }}
           extra-args: |
             --target esmini-headless
