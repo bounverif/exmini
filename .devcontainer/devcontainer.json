@@ -1,0 +1,13 @@
+{
+  "name": "esmini",
+  "build": {
+    "context": ".",
+    "dockerfile": "Dockerfile",
+    "args": {
+      "ESMINI_IMAGE_NAME": "ghcr.io/bounverif/esmini",
+      "ESMINI_VERSION": "latest"
+    },
+    "target": "esmini-devel"
+  },
+  "remoteUser": "ubuntu"
+}
