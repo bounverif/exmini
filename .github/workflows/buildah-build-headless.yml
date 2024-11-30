@@ -59,7 +59,7 @@ jobs:
           platforms: linux/amd64
           context: ./containers
           image: ${{ env.IMAGE_NAME }}
-          tags: ${{ env.ESMINI_VERSION }}-headless latest-builder
+          tags: ${{ env.ESMINI_VERSION }}-headless latest-headless
           layers: true
           oci: true
           build-args: |
