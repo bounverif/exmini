@@ -1,12 +1,12 @@
-name: buildah-build-builder
+name: buildah-build-headless
 on:
   workflow_dispatch:
   schedule:
-    - cron: "19 19 * * 0" # 19:19 UTC every Sunday
+    - cron: "20 19 * * 0" # 20:19 UTC every Sunday
   push:
     paths:
-      - .github/workflows/buildah-build-builder.yml # Self-trigger
-      - containers/esmini-builder/Dockerfile
+      - .github/workflows/buildah-build-headless.yml # Self-trigger
+      - containers/esmini-headless/Dockerfile
 
 env:
   REGISTRY: ghcr.io/bounverif
@@ -20,7 +20,7 @@ permissions:
   packages: write
 
 jobs:
-  buildah-build-builder:
+  buildah-build-headless:
     runs-on: ubuntu-24.04
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -52,29 +52,29 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build builder container image
-        id: build-builder
+      - name: Build headless container image
+        id: build-headless
         uses: redhat-actions/buildah-build@v2
         with:
           platforms: linux/amd64
           context: ./containers
           image: ${{ env.IMAGE_NAME }}
-          tags: ${{ env.ESMINI_VERSION }}-builder latest-builder
+          tags: ${{ env.ESMINI_VERSION }}-headless latest-builder
           layers: true
           oci: true
           build-args: |
             ESMINI_IMAGE_NAME=${{env.REGISTRY}}}/${{ env.IMAGE_NAME }}
             ESMINI_VERSION=${{ env.ESMINI_VERSION }}
           extra-args: |
-            --target esmini-builder
+            --target esmini-headless
           containerfiles: |
-            ./containers/esmini-builder/Dockerfile
+            ./containers/esmini-headless/Dockerfile
 
       - name: Push to GitHub Container Repository
         if: github.ref == 'refs/heads/main'
-        id: push-builder-ghcr
+        id: push-headless-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
           registry: ${{ env.REGISTRY }}
-          image: ${{ steps.build-builder.outputs.image }}
-          tags: ${{ steps.build-builder.outputs.tags }}
+          image: ${{ steps.build-headless.outputs.image }}
+          tags: ${{ steps.build-headless.outputs.tags }}
