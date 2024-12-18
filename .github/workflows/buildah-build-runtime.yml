@@ -1,0 +1,80 @@
+name: buildah-build-runtime
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 19 * * 0" # 20:19 UTC every Sunday
+  push:
+    paths:
+      - .github/workflows/buildah-build-runtime.yml # Self-trigger
+      - containers/esmini-runtime/Dockerfile
+
+env:
+  REGISTRY: ghcr.io/bounverif
+  IMAGE_NAME: esmini
+  ESMINI_VERSION: latest
+  CONTAINERS_ROOT: /home/runner/.local/share/containers
+  TMPDIR: /home/runner/.local/share/containers/tmp
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  buildah-build-runtime:
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true 
+    steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@v10
+        with:
+          root-reserve-mb: 2048 # Reserve disk space for repository
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-haskell: "true"
+          remove-codeql: "true"
+          remove-docker-images: "true"
+          build-mount-path: ${{ env.CONTAINERS_ROOT }} # The remaining space only for container build
+
+      - run: mkdir -p $TMPDIR
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set current date as the version
+        run: echo "ESMINI_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
+
+      - name: Log in to the GitHub Container registry
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build runtime container image
+        id: build-runtime
+        uses: redhat-actions/buildah-build@v2
+        with:
+          platforms: linux/amd64
+          context: .
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ env.ESMINI_VERSION }}-runtime latest-runtime latest
+          layers: true
+          oci: true
+          build-args: |
+            ESMINI_IMAGE_NAME=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            ESMINI_VERSION=${{ env.ESMINI_VERSION }}
+          extra-args: |
+            --target esmini-runtime
+          containerfiles: |
+            ./containers/esmini-runtime/Dockerfile
+
+      - name: Push to GitHub Container Repository
+        if: github.ref == 'refs/heads/main'
+        id: push-runtime-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          image: ${{ steps.build-runtime.outputs.image }}
+          tags: ${{ steps.build-runtime.outputs.tags }}
