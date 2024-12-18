@@ -57,7 +57,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           platforms: linux/amd64
-          context: ./containers
+          context: .
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ env.ESMINI_VERSION }}-builder latest-builder
           layers: true
