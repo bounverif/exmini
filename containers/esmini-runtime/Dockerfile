@@ -60,7 +60,7 @@ COPY --from=esmini-prebuilt ${ESMINI_SOURCE_DIR}/resources /usr/local/share/esmi
 
 COPY --chmod=755 esmini-runtime/esmini.sh /usr/local/bin/esmini.sh
 
-ENTRYPOINT ["/usr/local/bin/tini", "--"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/usr/local/bin/esmini.sh"]
 
 VOLUME ["/var/esmini/scenarios", "/var/esmini/data"]
