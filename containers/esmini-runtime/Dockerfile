@@ -50,6 +50,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=${TARGETPLATFORM}
     apt-get update -qq && \
     apt-get install -qy --no-install-recommends \
         sudo \
+        tini \
         && \
     apt-get autoremove -y && rm -rf /var/lib/apt/lists/* && \
     printf "ubuntu ALL= NOPASSWD: ALL\\n" >> /etc/sudoers
@@ -57,8 +58,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=${TARGETPLATFORM}
 COPY --from=esmini-prebuilt ${ESMINI_SOURCE_DIR}/bin /usr/local/bin
 COPY --from=esmini-prebuilt ${ESMINI_SOURCE_DIR}/resources /usr/local/share/esmini/resources
 
-COPY --chmod=755 scripts/entrypoint.runtime.sh /etc/esmini/entrypoint.sh
+COPY --chmod=755 esmini-runtime/esmini.sh /usr/local/bin/esmini.sh
 
-ENTRYPOINT ["/etc/esmini/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/tini", "--"]
+CMD ["/usr/local/bin/esmini.sh"]
 
 VOLUME ["/var/esmini/scenarios", "/var/esmini/data"]
