@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: esmini-cloud-native
+  labels:
+    app: esmini
+spec:
+  restartPolicy: Never
+  initContainers:
+    - name: xosc-scenarios
+      image: ghcr.io/bounverif/xosc-scenarios-alks:latest
+      imagePullPolicy: Always
+      command: ['sh', '-c', 'cp -r /opt/xosc/scenarios/ /var/esmini/']
+      volumeMounts:
+        - name: xosc-scenarios
+          mountPath: /var/esmini/scenarios
+  containers:
+    - name: esmini
+      image: ghcr.io/bounverif/esmini:latest
+      imagePullPolicy: Always
+      env:
+        - name: ESMINI_FIXED_TIMESTEP
+          value: 0.01
+      volumeMounts:
+        - name: xosc-scenarios
+          mountPath: /var/esmini/scenarios
+        - name: results
+          mountPath: /var/esmini/data
+  volumes:
+    - name: xosc-scenarios
+      emptyDir: {}
+    - name: results
+      hostPath: 
+        path: ./results
+        type: DirectoryOrCreate
