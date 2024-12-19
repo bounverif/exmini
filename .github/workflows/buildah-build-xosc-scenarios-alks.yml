@@ -6,7 +6,7 @@ on:
   push:
     paths:
       - .github/workflows/buildah-build-xosc-scenarios-alks.yml # Self-trigger
-      - containers/esmini-xosc-scenarios-alks/Dockerfile
+      - containers/xosc-scenarios-alks/Dockerfile
 
 env:
   REGISTRY: ghcr.io/bounverif
@@ -40,7 +40,7 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Log in to the GitHub Container registry
         uses: redhat-actions/podman-login@v1
         with:
