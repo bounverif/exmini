@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-FileCopyrightText: 2024 Dogan Ulus <dogan.ulus@bogazici.edu.tr> -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+<OpenSCENARIO>
+  <FileHeader revMajor="1" revMinor="3" />
+  <ParameterDeclarations>
+    <ParameterDeclaration name="OPENSCENARIO_MAX_SIMULATION_TIME" parameterType="double" value="30" />
+  </ParameterDeclarations>
+  <CatalogLocations>
+    <VehicleCatalog>
+      <Directory path="../assets/vehicles" />
+    </VehicleCatalog>
+  </CatalogLocations>
+  <RoadNetwork>
+    <LogicFile filepath="../maps/straight_road.xodr" />
+  </RoadNetwork>
+  <Entities>
+    <ScenarioObject name="Ego">
+      <CatalogReference catalogName="bogazici" entryName="m1.volvo.s60r" />
+    </ScenarioObject>
+  </Entities>
+  <Storyboard>
+    <Init>
+      <Actions>
+        <Private entityRef="Ego">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="0" laneId="-4" offset="0" s="50" />
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+        </Private>
+      </Actions>
+    </Init>
+    <StopTrigger>
+      <ConditionGroup>
+        <Condition name="simulation_time" delay="0" conditionEdge="rising">
+          <ByValueCondition>
+            <SimulationTimeCondition value="$OPENSCENARIO_MAX_SIMULATION_TIME" rule="greaterThan" />
+          </ByValueCondition>
+        </Condition>
+      </ConditionGroup>
+    </StopTrigger>
+  </Storyboard>
+</OpenSCENARIO>
