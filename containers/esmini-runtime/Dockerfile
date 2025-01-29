@@ -11,10 +11,10 @@ ARG TARGETARCH TARGETOS TARGETPLATFORM TARGETVARIANT
 ARG ESMINI_SOURCE_DIR
 ARG ESMINI_BUILD_DIR
 
-ARG ESMINI_BUILD_USE_SUMO=1
+ARG ESMINI_BUILD_USE_SUMO=0
 ARG ESMINI_BUILD_USE_GTEST=0
 ARG ESMINI_BUILD_USE_IMPLOT=0
-ARG ESMINI_BUILD_USE_OSG=0
+ARG ESMINI_BUILD_USE_OSG=1
 ARG ESMINI_BUILD_USE_OSI=1
 ARG ESMINI_BUILD_DYN_PROTOBUF=0
 
@@ -24,7 +24,8 @@ RUN git clone https://github.com/esmini/esmini.git "${ESMINI_SOURCE_DIR}" && \
       git checkout $(git describe --tags `git rev-list --tags --max-count=1`); \
     else \
       git checkout ${ESMINI_VERSION}; \
-    fi && \ 
+    fi && \
+    mkdir -p /etc/esmini && \
     printf "%s\\n" "$(git tag --points-at HEAD)" >> /etc/esmini/VERSION
 
 # TODO: Install system dependencies from the cloned repository
@@ -63,4 +64,4 @@ COPY --chmod=755 esmini-runtime/esmini.sh /usr/local/bin/esmini.sh
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/usr/local/bin/esmini.sh"]
 
-VOLUME ["/var/esmini/scenarios", "/var/esmini/data"]
+# VOLUME ["/var/esmini/scenarios", "/var/esmini/data"]
