@@ -35,7 +35,7 @@ RUN --mount=type=bind,source=dependencies.txt,target=/tmp/esmini/dependencies.tx
       && \
     apt-get autoremove -y && rm -rf /var/lib/apt/lists/* 
 
-COPY --chmod=755 scripts/build_osgdb_fbx.sh /usr/bin/build-osgdb-fbx
+COPY --chmod=755 scripts/build-osgdb-fbx.sh /usr/bin/build-osgdb-fbx.sh
 
 ARG ESMINI_VERSION
 ENV ESMINI_VERSION=${ESMINI_VERSION}
