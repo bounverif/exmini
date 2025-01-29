@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=${TARGETPLATFORM}
     export DEBIAN_FRONTEND=noninteractive && \
     apt-get update -qq && \
     apt-get install -qy --no-install-recommends \
-      doas \
+      sudo \
       curl \
       wget \
       git \
@@ -22,18 +22,34 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=${TARGETPLATFORM}
       python-is-python3 \
       && \
     apt-get autoremove -y && rm -rf /var/lib/apt/lists/* && \
-    echo "permit nopass ubuntu as root" >> /etc/doas.conf
+    printf "ubuntu ALL= NOPASSWD: ALL\\n" > /etc/sudoers.d/ubuntu
 
 RUN python3 -m pip config set global.break-system-packages true && \
     python3 -m pip install --no-cache-dir bindep
 
+# Install esmini devel packages
+RUN --mount=type=bind,source=dependencies.txt,target=/tmp/esmini/dependencies.txt \
+    apt-get update -qq && \
+    apt-get install -qy --no-install-recommends \
+      $(bindep builder --brief --file /tmp/esmini/dependencies.txt) \
+      && \
+    apt-get autoremove -y && rm -rf /var/lib/apt/lists/* 
+
+COPY --chmod=755 scripts/build_osgdb_fbx.sh /usr/bin/build-osgdb-fbx
+
 ARG ESMINI_VERSION
 ENV ESMINI_VERSION=${ESMINI_VERSION}
 
-# Install esmini devel packages
-COPY dependencies.txt /etc/esmini/dependencies.txt
-RUN apt-get update -qq && \
+FROM ${ESMINI_IMAGE_NAME}:${ESMINI_VERSION}-builder AS esmini-devel
+ARG TARGETARCH TARGETOS TARGETPLATFORM TARGETVARIANT
+
+# Build OpenSceneGraph from source with FBX support
+RUN --mount=type=bind,source=scripts,target=/tmp/scripts \
+    ./build-osgdb-fbx.sh
+
+RUN --mount=type=bind,source=dependencies.txt,target=/tmp/esmini/dependencies.txt \
+    apt-get update -qq && \
     apt-get install -qy --no-install-recommends \
-      $(bindep devel --brief --file /etc/esmini/dependencies.txt) \
+      $(bindep devel --brief --file /tmp/esmini/dependencies.txt) \
       && \
     apt-get autoremove -y && rm -rf /var/lib/apt/lists/* 
