@@ -112,7 +112,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           image: ${{ steps.build-builder.outputs.image }}
-          tags: ${{ steps.build-builder.outputs.tags }}
+          tags: ${{ env.ESMINI_VERSION }}-builder-${{ env.PODMAN_ARCH }}
           digestfile: ${{ runner.temp }}/digest-esmini-builder-${{ env.PLATFORM }}
 
       - name: Push to GitHub Container Repository
@@ -122,7 +122,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           image: ${{ steps.build-devel.outputs.image }}
-          tags: ${{ steps.build-devel.outputs.tags }}
+          tags: ${{ env.ESMINI_VERSION }}-devel-${{ env.PODMAN_ARCH }}
           digestfile: ${{ runner.temp }}/digest-esmini-devel-${{ env.PLATFORM }}
 
       - name: Upload digests
