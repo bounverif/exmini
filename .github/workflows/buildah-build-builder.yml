@@ -74,11 +74,11 @@ jobs:
         with:
           context: ./containers
           image: ${{ env.IMAGE_NAME }}
-          # tags: ${{ env.ESMINI_VERSION }}-builder latest-builder
+          tags: ${{ env.ESMINI_VERSION }}-builder
           layers: true
           oci: true
           build-args: |
-            ESMINI_IMAGE_NAME=${{env.REGISTRY}}}/${{ env.IMAGE_NAME }}
+            ESMINI_IMAGE_NAME=${{env.REGISTRY}}/${{ env.IMAGE_NAME }}
             ESMINI_VERSION=${{ env.ESMINI_VERSION }}
           extra-args: |
             --target esmini-builder
@@ -91,11 +91,11 @@ jobs:
         with:
           context: ./containers
           image: ${{ env.IMAGE_NAME }}
-          # tags: ${{ env.ESMINI_VERSION }}-devel latest-devel
+          tags: ${{ env.ESMINI_VERSION }}-devel
           layers: true
           oci: true
           build-args: |
-            ESMINI_IMAGE_NAME=${{env.REGISTRY}}}/${{ env.IMAGE_NAME }}
+            ESMINI_IMAGE_NAME=${{env.REGISTRY}}/${{ env.IMAGE_NAME }}
             ESMINI_VERSION=${{ env.ESMINI_VERSION }}
           extra-args: |
             --target esmini-devel
@@ -110,7 +110,6 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           image: ${{ steps.build-builder.outputs.image }}
-          # tags: ${{ steps.build-builder.outputs.tags }}
           digestfile: ${{ runner.temp }}/digest-esmini-builder-${{ env.PLATFORM }}
 
       - name: Push to GitHub Container Repository
@@ -121,7 +120,6 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           image: ${{ steps.build-devel.outputs.image }}
-          # tags: ${{ steps.build-devel.outputs.tags }}
           digestfile: ${{ runner.temp }}/digest-esmini-devel-${{ env.PLATFORM }}
 
   buildah-merge:
