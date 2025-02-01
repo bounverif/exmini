@@ -12,5 +12,7 @@ libxrandr-dev [builder platform:dpkg]
 libxinerama-dev [builder platform:dpkg]
 libgl1-mesa-dev [builder platform:dpkg]
 libegl1-mesa-dev [builder platform:dpkg]
+libopenscenegraph-dev [builder platform:dpkg]
 
-openscenegraph [builder platform:dpkg]
+python3 [devel platform:dpkg]
+python3-pip [devel platform:dpkg]

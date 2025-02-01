@@ -21,7 +21,20 @@ builder:
 		--tag ${ESMINI_IMAGE_NAME}:${ESMINI_CURRENT_VERSION}-builder \
 	${CONTAINER_BUILD_CONTEXT}
 
-runtime: 
+devel: builder
+	buildah build \
+		-f esmini-builder/Dockerfile \
+		--build-arg ESMINI_IMAGE_NAME=${ESMINI_IMAGE_NAME} \
+		--build-arg ESMINI_VERSION=${ESMINI_CURRENT_VERSION} \
+		--format oci \
+		--layers=true \
+		--cache-ttl=${CONTAINER_CACHE_TTL} \
+		--target esmini-devel \
+		--tag ${ESMINI_IMAGE_NAME}:${ESMINI_VERSION}-devel \
+		--tag ${ESMINI_IMAGE_NAME}:${ESMINI_CURRENT_VERSION}-devel \
+	${CONTAINER_BUILD_CONTEXT}
+
+runtime:
 	buildah build \
 		-f esmini-runtime/Dockerfile \
 		--build-arg ESMINI_IMAGE_NAME=${ESMINI_IMAGE_NAME} \

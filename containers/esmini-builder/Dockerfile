@@ -43,10 +43,6 @@ ENV ESMINI_VERSION=${ESMINI_VERSION}
 FROM ${ESMINI_IMAGE_NAME}:${ESMINI_VERSION}-builder AS esmini-devel
 ARG TARGETARCH TARGETOS TARGETPLATFORM TARGETVARIANT
 
-# Build OpenSceneGraph from source with FBX support
-RUN --mount=type=bind,source=scripts,target=/tmp/scripts \
-    ./build-osgdb-fbx.sh
-
 RUN --mount=type=bind,source=dependencies.txt,target=/tmp/esmini/dependencies.txt \
     apt-get update -qq && \
     apt-get install -qy --no-install-recommends \
