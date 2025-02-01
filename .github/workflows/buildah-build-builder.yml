@@ -121,8 +121,16 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           image: ${{ steps.build-devel.outputs.image }}
-          tags: ${{ steps.build-builder.outputs.tags }}
+          tags: ${{ steps.build-devel.outputs.tags }}
           digestfile: ${{ runner.temp }}/digest-esmini-devel-${{ env.PLATFORM }}
+
+      - name: Upload digests
+        uses: actions/upload-artifact@v4
+        with:
+          name: digest-esmini-${{ env.ESMINI_VERSION }}-${{ env.PLATFORM }}
+          path: ${{ runner.temp }}/digest-*
+          if-no-files-found: error
+          retention-days: 1
 
   buildah-merge:
     name: Merge container images
