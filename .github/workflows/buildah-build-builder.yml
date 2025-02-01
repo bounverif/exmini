@@ -76,7 +76,7 @@ jobs:
         with:
           context: ./containers
           image: esmini
-          tags: ${{ env.ESMINI_VERSION }}-builder-${{ env.PODMAN_ARCH }}
+          tags: ${{ env.ESMINI_VERSION }}-builder ${{ env.ESMINI_VERSION }}-builder-${{ env.PODMAN_ARCH }}
           layers: true
           oci: true
           build-args: |
@@ -92,7 +92,7 @@ jobs:
         with:
           context: ./containers
           image: esmini
-          tags: ${{ env.ESMINI_VERSION }}-devel-${{ env.PODMAN_ARCH }}
+          tags: ${{ env.ESMINI_VERSION }}-devel ${{ env.ESMINI_VERSION }}-devel-${{ env.PODMAN_ARCH }}
           layers: true
           oci: true
           build-args: |
