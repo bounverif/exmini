@@ -125,9 +125,13 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get the latest version
-        run: echo "ESMINI_LATEST_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
-      
+      - name: Prepare environment variables
+        run: |
+          if [ "${{ env.ESMINI_VERSION }}" == "latest" ]; then
+            echo "ESMINI_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
+          fi
+          echo "ESMINI_LATEST_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
+
       - name: Create and push manifest list for esmini-builder
         run: |
           MANIFEST=esmini-runtime
