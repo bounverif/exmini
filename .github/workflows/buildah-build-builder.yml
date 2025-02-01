@@ -113,7 +113,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           image: ${{ steps.build-builder.outputs.image }}
           tags: ${{ env.ESMINI_VERSION }}-builder-${{ env.PODMAN_ARCH }}
-          digestfile: ${{ runner.temp }}/digest-esmini-builder-${{ env.PLATFORM }}
+          digestfile: ${{ runner.temp }}/digest-esmini-builder-${{ env.ESMINI_VERSION }}-${{ env.PLATFORM }}
 
       - name: Push to GitHub Container Repository
         if: github.ref == 'refs/heads/multiarch-image'
@@ -123,7 +123,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           image: ${{ steps.build-devel.outputs.image }}
           tags: ${{ env.ESMINI_VERSION }}-devel-${{ env.PODMAN_ARCH }}
-          digestfile: ${{ runner.temp }}/digest-esmini-devel-${{ env.PLATFORM }}
+          digestfile: ${{ runner.temp }}/digest-esmini-devel-${{ env.ESMINI_VERSION }}-${{ env.PLATFORM }}
 
       - name: Upload digests
         if: github.ref == 'refs/heads/multiarch-image'
@@ -160,7 +160,7 @@ jobs:
         run: |
           echo "ESMINI_LATEST_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
           if [ "${{ env.ESMINI_VERSION }}" == "latest" ]; then
-            echo "ESMINI_VERSION=${{ env.ESMINI_LATEST_VERSION }}" >> $GITHUB_ENV
+            echo "ESMINI_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
           fi
 
       - name: Create and push manifest list for esmini-builder
