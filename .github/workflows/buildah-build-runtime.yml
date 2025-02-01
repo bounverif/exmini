@@ -73,7 +73,7 @@ jobs:
         with:
           context: ./containers
           image: ${{ env.IMAGE_NAME }}
-          tags: ${{ env.ESMINI_VERSION }}-runtime ${{ env.ESMINI_VERSION }}-runtime-${{ env.PODMAN_ARCH }}
+          tags: ${{ env.ESMINI_VERSION }}-runtime ${{ env.ESMINI_VERSION }}-runtime-${{ env.PODMAN_ARCH }} ${{ env.ESMINI_VERSION }}-${{ env.PODMAN_ARCH }}
           layers: true
           oci: true
           build-args: |
@@ -91,7 +91,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           image: ${{ steps.build-runtime.outputs.image }}
-          tags: ${{ steps.build-runtime.outputs.tags }}
+          tags: ${{ env.ESMINI_VERSION }}-runtime-${{ env.PODMAN_ARCH }} ${{ env.ESMINI_VERSION }}-${{ env.PODMAN_ARCH }}
           digestfile: ${{ runner.temp }}/digest-esmini-runtime-${{ env.PLATFORM }}
 
       - name: Upload digests
