@@ -73,12 +73,11 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           context: ./containers
-          image: ${{ env.IMAGE_NAME }}
+          image: localhost/esmini
           tags: ${{ env.ESMINI_VERSION }}-builder
           layers: true
           oci: true
           build-args: |
-            ESMINI_IMAGE_NAME=${{env.REGISTRY}}/${{ env.IMAGE_NAME }}
             ESMINI_VERSION=${{ env.ESMINI_VERSION }}
           extra-args: |
             --target esmini-builder
@@ -90,12 +89,11 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           context: ./containers
-          image: ${{ env.IMAGE_NAME }}
+          image: localhost/esmini
           tags: ${{ env.ESMINI_VERSION }}-devel
           layers: true
           oci: true
           build-args: |
-            ESMINI_IMAGE_NAME=${{env.REGISTRY}}/${{ env.IMAGE_NAME }}
             ESMINI_VERSION=${{ env.ESMINI_VERSION }}
           extra-args: |
             --target esmini-devel
