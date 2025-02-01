@@ -1,4 +1,0 @@
-esmini GIT REV: v2.44.0-0-f3a96c78-dirty
-esmini GIT TAG: v2.44.0
-esmini GIT BRANCH: tags/v2.44.0^0
-esmini BUILD VERSION: N/A - client build
