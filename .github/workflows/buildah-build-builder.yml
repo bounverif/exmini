@@ -168,9 +168,10 @@ jobs:
             echo "Adding $(cat $digest)"
             buildah manifest add $MANIFEST $FULL_IMAGE_NAME@$(cat $digest)
           done
-          buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-builder
           if [ "${{ env.ESMINI_VERSION }}" == "${{ env.ESMINI_LATEST_VERSION }}" ]; then
-            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-builder
+            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-builder docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-builder
+          else
+            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-builder
           fi
 
       - name: Create and push manifest list for esmini-builder
@@ -182,7 +183,8 @@ jobs:
             echo "Adding $(cat $digest)"
             buildah manifest add $MANIFEST $FULL_IMAGE_NAME@$(cat $digest)
           done
-          buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-devel
           if [ "${{ env.ESMINI_VERSION }}" == "${{ env.ESMINI_LATEST_VERSION }}" ]; then
-            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-devel
+            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-devel docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-devel
+          else
+            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-devel
           fi
