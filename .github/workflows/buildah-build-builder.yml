@@ -156,9 +156,13 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get the latest version
-        run: echo "ESMINI_LATEST_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
-      
+      - name: Prepare environment variables
+        run: |
+          echo "ESMINI_LATEST_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
+          if [ "${{ env.ESMINI_VERSION }}" == "latest" ]; then
+            echo "ESMINI_VERSION=${{ env.ESMINI_LATEST_VERSION }}" >> $GITHUB_ENV
+          fi
+
       - name: Create and push manifest list for esmini-builder
         run: |
           MANIFEST=esmini-builder
@@ -168,13 +172,12 @@ jobs:
             echo "Adding $(cat $digest)"
             buildah manifest add $MANIFEST $FULL_IMAGE_NAME@$(cat $digest)
           done
+          buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-builder
           if [ "${{ env.ESMINI_VERSION }}" == "${{ env.ESMINI_LATEST_VERSION }}" ]; then
-            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-builder docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-builder
-          else
-            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-builder
+            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-builder 
           fi
 
-      - name: Create and push manifest list for esmini-builder
+      - name: Create and push manifest list for esmini-devel
         run: |
           MANIFEST=esmini-devel
           FULL_IMAGE_NAME=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
@@ -183,8 +186,7 @@ jobs:
             echo "Adding $(cat $digest)"
             buildah manifest add $MANIFEST $FULL_IMAGE_NAME@$(cat $digest)
           done
+          buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-devel
           if [ "${{ env.ESMINI_VERSION }}" == "${{ env.ESMINI_LATEST_VERSION }}" ]; then
-            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-devel docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-devel
-          else
-            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-devel
+            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-devel 
           fi
