@@ -103,7 +103,6 @@ jobs:
             ./containers/esmini-builder/Dockerfile
 
       - name: Push to GitHub Container Repository
-        # if: github.ref == 'refs/heads/main'
         if: github.ref == 'refs/heads/multiarch-image'
         id: push-builder-ghcr
         uses: redhat-actions/push-to-registry@v2
@@ -114,7 +113,6 @@ jobs:
           digestfile: ${{ runner.temp }}/digest-esmini-builder-${{ env.PLATFORM }}
 
       - name: Push to GitHub Container Repository
-        # if: github.ref == 'refs/heads/main'
         if: github.ref == 'refs/heads/multiarch-image'
         id: push-devel-ghcr
         uses: redhat-actions/push-to-registry@v2
@@ -125,6 +123,7 @@ jobs:
           digestfile: ${{ runner.temp }}/digest-esmini-devel-${{ env.PLATFORM }}
 
       - name: Upload digests
+        if: github.ref == 'refs/heads/multiarch-image'
         uses: actions/upload-artifact@v4
         with:
           name: digest-esmini-${{ env.ESMINI_VERSION }}-${{ env.PLATFORM }}
@@ -137,7 +136,6 @@ jobs:
     name: Merge container images
     runs-on: ubuntu-24.04
     needs: buildah-build
-    # if: github.ref == 'refs/heads/main'
     if: github.ref == 'refs/heads/multiarch-image'
     steps:
       # - run: mkdir -p $TMPDIR
@@ -155,7 +153,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set current date as the version
+      - name: Get the latest version
         run: echo "ESMINI_LATEST_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
       
       - name: Create and push manifest list for esmini-builder
