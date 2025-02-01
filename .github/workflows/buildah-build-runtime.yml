@@ -47,12 +47,15 @@ jobs:
       #     build-mount-path: ${{ env.CONTAINERS_ROOT }} # The remaining space only for container build
       # - run: mkdir -p $TMPDIR
 
-      - name: Set platform tag
+      - name: Prepare environment variables
         run: |
           arch=$(podman info --format='{{.Host.Arch}}')
           platform=$(podman info --format='{{.Version.OsArch}}' | sed 's/\//-/g')
           echo "PODMAN_ARCH=${arch}" >> $GITHUB_ENV
           echo "PLATFORM=${platform}" >> $GITHUB_ENV
+          if [ "${{ env.ESMINI_VERSION }}" == "latest" ]; then
+            echo "ESMINI_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
+          fi
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -74,6 +77,7 @@ jobs:
           layers: true
           oci: true
           build-args: |
+            ESMINI_IMAGE_NAME=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
             ESMINI_VERSION=${{ env.ESMINI_VERSION }}
           extra-args: |
             --target esmini-runtime

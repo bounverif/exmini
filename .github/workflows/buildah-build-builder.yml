@@ -12,12 +12,12 @@ on:
         description: ESMINI_VERSION
         type: string
         required: true
-        default: v2.45.1
+        default: latest
         
 env:
   REGISTRY: ghcr.io/bounverif
   IMAGE_NAME: esmini
-  ESMINI_VERSION: v2.45.1
+  ESMINI_VERSION: latest
   # CONTAINERS_ROOT: /home/runner/.local/share/containers
   # TMPDIR: /home/runner/.local/share/containers/tmp
 
@@ -53,12 +53,15 @@ jobs:
       #     build-mount-path: ${{ env.CONTAINERS_ROOT }} # The remaining space only for container build
       # - run: mkdir -p $TMPDIR
 
-      - name: Set platform tag
+      - name: Prepare environment variables
         run: |
           arch=$(podman info --format='{{.Host.Arch}}')
           platform=$(podman info --format='{{.Version.OsArch}}' | sed 's/\//-/g')
           echo "PODMAN_ARCH=${arch}" >> $GITHUB_ENV
           echo "PLATFORM=${platform}" >> $GITHUB_ENV
+          if [ "${{ env.ESMINI_VERSION }}" == "latest" ]; then
+            echo "ESMINI_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
+          fi
 
       - name: Checkout repository
         uses: actions/checkout@v4
