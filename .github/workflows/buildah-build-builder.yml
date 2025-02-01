@@ -17,7 +17,7 @@ on:
 env:
   REGISTRY: ghcr.io/bounverif
   IMAGE_NAME: esmini
-  ESMINI_VERSION: ${{ github.event.inputs.esmini_version }}
+  ESMINI_VERSION: v2.45.1
   # CONTAINERS_ROOT: /home/runner/.local/share/containers
   # TMPDIR: /home/runner/.local/share/containers/tmp
 
