@@ -17,7 +17,10 @@ on:
 env:
   REGISTRY: ghcr.io/bounverif
   IMAGE_NAME: esmini
+  PODMAN_ARCH: amd64
+  PLATFORM: linux-amd64
   ESMINI_VERSION: latest
+  ESMINI_LATEST_VERSION: latest
   # CONTAINERS_ROOT: /home/runner/.local/share/containers
   # TMPDIR: /home/runner/.local/share/containers/tmp
 
@@ -55,13 +58,12 @@ jobs:
 
       - name: Prepare environment variables
         run: |
-          arch=$(podman info --format='{{.Host.Arch}}')
-          platform=$(podman info --format='{{.Version.OsArch}}' | sed 's/\//-/g')
-          echo "PODMAN_ARCH=${arch}" >> $GITHUB_ENV
-          echo "PLATFORM=${platform}" >> $GITHUB_ENV
+          echo "PODMAN_ARCH=$(podman info --format='{{.Host.Arch}}')" >> $GITHUB_ENV
+          echo "PLATFORM=$(podman info --format='{{.Version.OsArch}}' | sed 's/\//-/g')" >> $GITHUB_ENV
           if [ "${{ env.ESMINI_VERSION }}" == "latest" ]; then
             echo "ESMINI_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
           fi
+          echo "ESMINI_LATEST_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -79,7 +81,9 @@ jobs:
         with:
           context: ./containers
           image: esmini
-          tags: ${{ env.ESMINI_VERSION }}-builder ${{ env.ESMINI_VERSION }}-builder-${{ env.PODMAN_ARCH }}
+          tags: |
+            ${{ env.ESMINI_VERSION }}-builder 
+            ${{ env.ESMINI_VERSION }}-builder-${{ env.PODMAN_ARCH }}
           layers: true
           oci: true
           build-args: |
@@ -139,7 +143,7 @@ jobs:
     name: Merge container images
     runs-on: ubuntu-24.04
     needs: buildah-build
-    if: github.ref == 'refs/heads/multiarch-image'
+    if: github.ref == 'refs/heads/multiarch-image' && always()
     steps:
       # - run: mkdir -p $TMPDIR
       - name: Download digests
@@ -158,10 +162,10 @@ jobs:
 
       - name: Prepare environment variables
         run: |
-          echo "ESMINI_LATEST_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
           if [ "${{ env.ESMINI_VERSION }}" == "latest" ]; then
             echo "ESMINI_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
           fi
+          echo "ESMINI_LATEST_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
 
       - name: Create and push manifest list for esmini-builder
         run: |
