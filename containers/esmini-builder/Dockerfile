@@ -15,17 +15,23 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=${TARGETPLATFORM}
       curl \
       wget \
       git \
+      jq \
       gnupg2 \
       ca-certificates \
       python3-minimal \
       python3-pip \
+      pipx \
       python-is-python3 \
       && \
     apt-get autoremove -y && rm -rf /var/lib/apt/lists/* && \
     printf "ubuntu ALL= NOPASSWD: ALL\\n" > /etc/sudoers.d/ubuntu
 
+# Install some python utilities
 RUN python3 -m pip config set global.break-system-packages true && \
-    python3 -m pip install --no-cache-dir bindep
+    python3 -m pip install --no-cache-dir \
+      bindep \
+      && \
+    PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin pipx install semver
 
 # Install esmini devel packages
 RUN --mount=type=bind,source=dependencies.txt,target=/tmp/esmini/dependencies.txt \
@@ -35,7 +41,19 @@ RUN --mount=type=bind,source=dependencies.txt,target=/tmp/esmini/dependencies.tx
       && \
     apt-get autoremove -y && rm -rf /var/lib/apt/lists/* 
 
-COPY --chmod=755 scripts/build-osgdb-fbx.sh /usr/bin/build-osgdb-fbx.sh
+ARG ESMINI_BUILD_PROTOBUF_VERSION=3.15.2
+ENV ESMINI_BUILD_PROTOBUF_VERSION=${ESMINI_BUILD_PROTOBUF_VERSION}
+COPY --chmod=755 scripts/protobuf-install.sh /usr/local/bin/protobuf-install.sh
+RUN /usr/local/bin/protobuf-install.sh
+
+ARG ESMINI_BUILD_OSI_VERSION=3.5.0
+ENV ESMINI_BUILD_OSI_VERSION=${ESMINI_BUILD_OSI_VERSION}
+COPY --chmod=755 scripts/osi-install.sh /usr/local/bin/osi-install.sh
+RUN /usr/local/bin/osi-install.sh
+
+ARG ESMINI_BUILD_OSG_VERSION=3.6.5
+ENV ESMINI_BUILD_OSG_VERSION=${ESMINI_BUILD_OSG_VERSION}
+COPY --chmod=755 scripts/osg-install.sh /usr/local/bin/osg-install.sh
 
 ARG ESMINI_VERSION
 ENV ESMINI_VERSION=${ESMINI_VERSION}

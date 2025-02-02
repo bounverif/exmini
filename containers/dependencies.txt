@@ -1,6 +1,8 @@
+# Buildtool dependencies
 build-essential [builder platform:dpkg]
 cmake [builder platform:dpkg]
 
+# Build dependencies
 libz-dev [builder platform:dpkg]
 libfontconfig-dev [builder platform:dpkg]
 libxml2-utils [builder platform:dpkg]
