@@ -1,6 +1,7 @@
 # Buildtool dependencies
 build-essential [builder platform:dpkg]
 cmake [builder platform:dpkg]
+ninja-build [builder platform:dpkg]
 
 # Build dependencies
 libz-dev [builder platform:dpkg]
