@@ -7,7 +7,7 @@
       "ESMINI_IMAGE_NAME": "ghcr.io/bounverif/esmini",
       "ESMINI_VERSION": "latest"
     },
-    "target": "esmini-devel"
+    "target": "devcontainer"
   },
   "remoteUser": "ubuntu"
 }

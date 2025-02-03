@@ -8,6 +8,17 @@ info:
 	@echo "esmini version: ${ESMINI_VERSION}"
 	@echo "esmini current version: ${ESMINI_CURRENT_VERSION}"
 
+openscenegraph: 
+	buildah build \
+		-f esmini-builder/Dockerfile \
+		--build-arg ESMINI_BUILD_OSG_VERSION=3.6.5 \
+		--format oci \
+		--layers=true \
+		--target osg-builder \
+		--tag ${ESMINI_IMAGE_NAME}:3.6.5-openscenegraph \
+		--tag ${ESMINI_IMAGE_NAME}:latest-openscenegraph \
+	${CONTAINER_BUILD_CONTEXT}
+
 builder: 
 	buildah build \
 		-f esmini-builder/Dockerfile \

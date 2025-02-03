@@ -11,39 +11,56 @@ on:
 env:
   REGISTRY: ghcr.io/bounverif
   IMAGE_NAME: esmini
+  PODMAN_ARCH: amd64
+  PLATFORM: linux-amd64
   ESMINI_VERSION: latest
-  CONTAINERS_ROOT: /home/runner/.local/share/containers
-  TMPDIR: /home/runner/.local/share/containers/tmp
+  ESMINI_LATEST_VERSION: latest
+  # CONTAINERS_ROOT: /home/runner/.local/share/containers
+  # TMPDIR: /home/runner/.local/share/containers/tmp
 
 permissions:
   contents: read
   packages: write
 
 jobs:
-  buildah-build-runtime:
-    runs-on: ubuntu-24.04
+  buildah-build:
+    name: Build container images
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true 
-    steps:
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@v10
-        with:
-          root-reserve-mb: 2048 # Reserve disk space for repository
-          remove-dotnet: "true"
-          remove-android: "true"
-          remove-haskell: "true"
-          remove-codeql: "true"
-          remove-docker-images: "true"
-          build-mount-path: ${{ env.CONTAINERS_ROOT }} # The remaining space only for container build
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}
+      cancel-in-progress: true
 
-      - run: mkdir -p $TMPDIR
+    steps:
+      - name: Install container tools
+        run: sudo apt-get install podman buildah jq
+
+      # - name: Maximize build space
+      #   uses: easimon/maximize-build-space@v10
+      #   with:
+      #     root-reserve-mb: 2048 # Reserve disk space for repository
+      #     remove-dotnet: "true"
+      #     remove-android: "true"
+      #     remove-haskell: "true"
+      #     remove-codeql: "true"
+      #     remove-docker-images: "true"
+      #     build-mount-path: ${{ env.CONTAINERS_ROOT }} # The remaining space only for container build
+      # - run: mkdir -p $TMPDIR
+
+      - name: Prepare environment variables
+        run: |
+          echo "PODMAN_ARCH=$(podman info --format='{{.Host.Arch}}')" >> $GITHUB_ENV
+          echo "PLATFORM=$(podman info --format='{{.Version.OsArch}}' | sed 's/\//-/g')" >> $GITHUB_ENV
+          if [ "${{ env.ESMINI_VERSION }}" == "latest" ]; then
+            echo "ESMINI_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
+          fi
+          echo "ESMINI_LATEST_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
 
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set current date as the version
-        run: echo "ESMINI_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
 
       - name: Log in to the GitHub Container registry
         uses: redhat-actions/podman-login@v1
@@ -56,10 +73,9 @@ jobs:
         id: build-runtime
         uses: redhat-actions/buildah-build@v2
         with:
-          platforms: linux/amd64
           context: ./containers
           image: ${{ env.IMAGE_NAME }}
-          tags: ${{ env.ESMINI_VERSION }}-runtime latest-runtime latest
+          tags: ${{ env.ESMINI_VERSION }}-runtime ${{ env.ESMINI_VERSION }}-runtime-${{ env.PODMAN_ARCH }} ${{ env.ESMINI_VERSION }}-${{ env.PODMAN_ARCH }}
           layers: true
           oci: true
           build-args: |
@@ -71,10 +87,64 @@ jobs:
             ./containers/esmini-runtime/Dockerfile
 
       - name: Push to GitHub Container Repository
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/multiarch-image'
         id: push-runtime-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
           registry: ${{ env.REGISTRY }}
           image: ${{ steps.build-runtime.outputs.image }}
-          tags: ${{ steps.build-runtime.outputs.tags }}
+          tags: ${{ env.ESMINI_VERSION }}-runtime-${{ env.PODMAN_ARCH }} ${{ env.ESMINI_VERSION }}-${{ env.PODMAN_ARCH }}
+          digestfile: ${{ runner.temp }}/digest-esmini-runtime-${{ env.PLATFORM }}
+
+      - name: Upload digests
+        if: github.ref == 'refs/heads/multiarch-image'
+        uses: actions/upload-artifact@v4
+        with:
+          name: digest-esmini-${{ env.ESMINI_VERSION }}-${{ env.PLATFORM }}
+          path: ${{ runner.temp }}/digest-*
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0 # no compression
+
+  buildah-merge:
+    name: Merge container images
+    runs-on: ubuntu-24.04
+    needs: buildah-build
+    if: github.ref == 'refs/heads/multiarch-image' && always()
+    steps:
+      # - run: mkdir -p $TMPDIR
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digest-*
+          merge-multiple: true
+
+      - name: Log in to the GitHub Container registry
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare environment variables
+        run: |
+          if [ "${{ env.ESMINI_VERSION }}" == "latest" ]; then
+            echo "ESMINI_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
+          fi
+          echo "ESMINI_LATEST_VERSION=$(curl -sL "https://api.github.com/repos/esmini/esmini/releases/latest" | jq -r '.tag_name')" >> $GITHUB_ENV
+
+      - name: Create and push manifest list for esmini-builder
+        run: |
+          MANIFEST=esmini-runtime
+          FULL_IMAGE_NAME=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          buildah manifest create $MANIFEST
+          for digest in ${{ runner.temp }}/digests/digest-esmini-runtime-*; do
+            echo "Adding $(cat $digest)"
+            buildah manifest add $MANIFEST $FULL_IMAGE_NAME@$(cat $digest)
+          done
+          buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-runtime
+          if [ "${{ env.ESMINI_VERSION }}" == "${{ env.ESMINI_LATEST_VERSION }}" ]; then
+            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-runtime
+            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest
+          fi
