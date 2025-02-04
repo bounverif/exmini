@@ -10,14 +10,14 @@ info:
 
 openscenegraph: 
 	buildah build \
-		-f esmini-builder/Dockerfile \
+		-f esmini-openscenegraph/Dockerfile \
 		--build-arg ESMINI_BUILD_OSG_VERSION=3.6.5 \
 		--format oci \
 		--layers=true \
-		--target osg-builder \
+		--target esmini-openscenegraph \
 		--tag ${ESMINI_IMAGE_NAME}:3.6.5-openscenegraph \
 		--tag ${ESMINI_IMAGE_NAME}:latest-openscenegraph \
-	${CONTAINER_BUILD_CONTEXT}
+	${CONTAINER_BUILD_CONTEXT}/esmini-openscenegraph
 
 builder: 
 	buildah build \
@@ -30,7 +30,7 @@ builder:
 		--target esmini-builder \
 		--tag ${ESMINI_IMAGE_NAME}:${ESMINI_VERSION}-builder \
 		--tag ${ESMINI_IMAGE_NAME}:${ESMINI_CURRENT_VERSION}-builder \
-	${CONTAINER_BUILD_CONTEXT}
+	${CONTAINER_BUILD_CONTEXT}/esmini-builder
 
 devel: builder
 	buildah build \
@@ -43,7 +43,7 @@ devel: builder
 		--target esmini-devel \
 		--tag ${ESMINI_IMAGE_NAME}:${ESMINI_VERSION}-devel \
 		--tag ${ESMINI_IMAGE_NAME}:${ESMINI_CURRENT_VERSION}-devel \
-	${CONTAINER_BUILD_CONTEXT}
+	${CONTAINER_BUILD_CONTEXT}/esmini-builder
 
 runtime:
 	buildah build \
