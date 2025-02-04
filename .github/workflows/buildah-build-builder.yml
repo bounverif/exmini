@@ -4,8 +4,9 @@ on:
     - cron: "19 19 * * 0" # 19:19 UTC every Sunday
   push:
     paths:
+      - containers/esmini-builder/**
       - .github/workflows/buildah-build-builder.yml # Self-trigger
-      - containers/esmini-builder/Dockerfile
+
   workflow_dispatch:
     inputs:
       esmini_version:
@@ -79,7 +80,7 @@ jobs:
         id: build-builder
         uses: redhat-actions/buildah-build@v2
         with:
-          context: ./containers
+          context: ./containers/esmini-builder
           image: esmini
           tags: |
             ${{ env.ESMINI_VERSION }}-builder 
