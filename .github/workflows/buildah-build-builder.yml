@@ -98,7 +98,7 @@ jobs:
         id: build-devel
         uses: redhat-actions/buildah-build@v2
         with:
-          context: ./containers
+          context: ./containers/esmini-builder
           image: esmini
           tags: ${{ env.ESMINI_VERSION }}-devel ${{ env.ESMINI_VERSION }}-devel-${{ env.PODMAN_ARCH }}
           layers: true
