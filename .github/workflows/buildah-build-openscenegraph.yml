@@ -53,7 +53,7 @@ jobs:
         id: build-openscenegraph
         uses: redhat-actions/buildah-build@v2
         with:
-          context: ./containers
+          context: ./containers/esmini-openscenegraph
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ env.ESMINI_BUILD_OSG_VERSION }}-openscenegraph ${{ env.ESMINI_BUILD_OSG_VERSION }}-openscenegraph-${{ env.PODMAN_ARCH }}
           layers: true
