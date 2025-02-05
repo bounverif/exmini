@@ -67,7 +67,7 @@ jobs:
           extra-args: |
             --target esmini-asam-osi
           containerfiles: |
-            ./containers/esmini-saosi/Dockerfile
+            ./containers/esmini-asam-osi/Dockerfile
 
       - name: Push to GitHub Container Repository
         if: github.ref == 'refs/heads/main'
