@@ -4,6 +4,9 @@ ESMINI_CURRENT_VERSION := $(if $(filter latest,$(ESMINI_VERSION)),$(shell curl -
 CONTAINER_BUILD_CONTEXT ?= .
 CONTAINER_CACHE_TTL=24h
 
+ESMINI_BUILD_ASAM_OSI_VERSION ?= 3.5.0
+ESMINI_BUILD_PROTOBUF_VERSION ?= 3.15.8
+
 info:
 	@echo "esmini version: ${ESMINI_VERSION}"
 	@echo "esmini current version: ${ESMINI_CURRENT_VERSION}"
@@ -18,6 +21,17 @@ openscenegraph:
 		--tag ${ESMINI_IMAGE_NAME}:3.6.5-openscenegraph \
 		--tag ${ESMINI_IMAGE_NAME}:latest-openscenegraph \
 	${CONTAINER_BUILD_CONTEXT}/esmini-openscenegraph
+
+asam-osi:
+	buildah build \
+		-f esmini-asam-osi/Dockerfile \
+		--build-arg ESMINI_BUILD_ASAM_OSI_VERSION=${ESMINI_BUILD_ASAM_OSI_VERSION} \
+		--format oci \
+		--layers=true \
+		--target esmini-asam-osi \
+		--tag ${ESMINI_IMAGE_NAME}:${ESMINI_BUILD_ASAM_OSI_VERSION}-asam-osi \
+		--tag ${ESMINI_IMAGE_NAME}:latest-asam-osi \
+	${CONTAINER_BUILD_CONTEXT}/esmini-asam-osi
 
 builder: 
 	buildah build \
