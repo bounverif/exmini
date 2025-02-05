@@ -1,7 +1,7 @@
 ARG ESMINI_BASE_IMAGE=docker.io/library/ubuntu
 ARG ESMINI_BASE_IMAGE_VERSION=24.04
 
-FROM ${ESMINI_BASE_IMAGE}:${ESMINI_BASE_IMAGE_VERSION} AS esmini-openscenegraph
+FROM ${ESMINI_BASE_IMAGE}:${ESMINI_BASE_IMAGE_VERSION} AS esmini-openscenegraph-builder
 ARG TARGETARCH TARGETOS TARGETPLATFORM TARGETVARIANT
 
 ARG ESMINI_BUILD_OSG_VERSION=latest
@@ -47,3 +47,6 @@ ENV ESMINI_BUILD_OSG_BUILD_APPLICATIONS=${ESMINI_BUILD_OSG_BUILD_APPLICATIONS}
 
 COPY --chmod=755 scripts/osg-install.sh /usr/local/bin/osg-install.sh
 RUN /usr/local/bin/osg-install.sh
+
+FROM ${ESMINI_BASE_IMAGE}:${ESMINI_BASE_IMAGE_VERSION} AS esmini-openscenegraph
+COPY --from=esmini-openscenegraph-builder /usr/local/ /usr/local/
