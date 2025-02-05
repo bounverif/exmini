@@ -26,11 +26,12 @@ asam-osi:
 	buildah build \
 		-f esmini-asam-osi/Dockerfile \
 		--build-arg ESMINI_BUILD_ASAM_OSI_VERSION=${ESMINI_BUILD_ASAM_OSI_VERSION} \
+		--build-arg ESMINI_BUILD_PROTOBUF_VERSION=${ESMINI_BUILD_PROTOBUF_VERSION} \
 		--format oci \
 		--layers=true \
 		--target esmini-asam-osi \
-		--tag ${ESMINI_IMAGE_NAME}:${ESMINI_BUILD_ASAM_OSI_VERSION}-asam-osi \
-		--tag ${ESMINI_IMAGE_NAME}:latest-asam-osi \
+		--tag ${ESMINI_IMAGE_NAME}:${ESMINI_BUILD_ASAM_OSI_VERSION}-${ESMINI_BUILD_PROTOBUF_VERSION}-asam-osi \
+		--tag ${ESMINI_IMAGE_NAME}:latest-${ESMINI_BUILD_PROTOBUF_VERSION}-asam-osi \
 	${CONTAINER_BUILD_CONTEXT}/esmini-asam-osi
 
 builder: 
