@@ -76,14 +76,14 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           image: ${{ steps.build-asam-osi.outputs.image }}
-          tags: ${{ env.ESMINI_BUILD_OSI_VERSION }}-asam-osi-${{ env.PODMAN_ARCH }}
+          tags: ${{ env.ESMINI_BUILD_OSI_VERSION }}-${{ env.ESMINI_BUILD_PROTOBUF_VERSION }}-asam-osi-${{ env.PODMAN_ARCH }}
           digestfile: ${{ runner.temp }}/digest-esmini-asam-osi-${{ env.PLATFORM }}
 
       - name: Upload digests
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
-          name: digest-esmini-${{ env.ESMINI_BUILD_OSI_VERSION }}-${{ env.PLATFORM }}
+          name: digest-esmini-${{ env.ESMINI_BUILD_OSI_VERSION }}-${{ env.ESMINI_BUILD_PROTOBUF_VERSION }}-${{ env.PLATFORM }}
           path: ${{ runner.temp }}/digest-*
           if-no-files-found: error
           retention-days: 1
@@ -110,7 +110,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create and push manifest list for osi
+      - name: Create and push manifest list for ASAM OSI
         run: |
           MANIFEST=esmini-asam-osi
           FULL_IMAGE_NAME=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
@@ -119,7 +119,7 @@ jobs:
             echo "Adding $(cat $digest)"
             buildah manifest add $MANIFEST $FULL_IMAGE_NAME@$(cat $digest)
           done
-          buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_BUILD_OSI_VERSION }}-asam-osi
+          buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_BUILD_OSI_VERSION }}-${{ env.ESMINI_BUILD_PROTOBUF_VERSION }}-asam-osi
           if [ "${{ env.ESMINI_BUILD_OSI_VERSION }}" == "${{ env.ESMINI_BUILD_OSI_VERSION_LATEST }}" ]; then
-            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-asam-osi
+            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-${{ env.ESMINI_BUILD_PROTOBUF_VERSION }}-asam-osi
           fi
