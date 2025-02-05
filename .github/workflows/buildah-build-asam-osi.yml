@@ -57,7 +57,7 @@ jobs:
         with:
           context: ./containers/esmini-asam-osi
           image: ${{ env.IMAGE_NAME }}
-          tags: ;
+          tags: |
             ${{ env.ESMINI_BUILD_OSI_VERSION }}-${{ env.ESMINI_BUILD_PROTOBUF_VERSION }}-asam-osi 
             ${{ env.ESMINI_BUILD_OSI_VERSION }}-${{ env.ESMINI_BUILD_PROTOBUF_VERSION }}-asam-osi-${{ env.PODMAN_ARCH }}
           layers: true
