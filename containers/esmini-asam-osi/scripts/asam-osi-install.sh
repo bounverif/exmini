@@ -15,6 +15,25 @@ git clone "${ESMINI_BUILD_OSI_SOURCE_REPOSITORY_URL}" ${ESMINI_BUILD_OSI_SOURCE_
   --depth 1 \
   --branch "v${ESMINI_BUILD_ASAM_OSI_VERSION}" \
   --recurse-submodules
+
+if dpkg --compare-versions "${ESMINI_BUILD_ASAM_OSI_VERSION}" "lt" "3.8"; then
+mkdir -p ${ESMINI_BUILD_OSI_SOURCE_DIR}/patch
+cat >${ESMINI_BUILD_OSI_SOURCE_DIR}/patch/asam-osi-cmake.patch <<'EOF'
+diff --git a/open_simulation_interface-config.cmake.in b/open_simulation_interface-config.cmake.in
+index 615ec5c..a285246 100644
+--- a/open_simulation_interface-config.cmake.in
++++ b/open_simulation_interface-config.cmake.in
+@@ -6,5 +6,5 @@ find_dependency(Protobuf)
+ if(NOT TARGET @PROJECT_NAME@ AND NOT @PROJECT_NAME@_BINARY_DIR)
+   set_and_check(OPEN_SIMULATION_INTERFACE_INCLUDE_DIRS "@PACKAGE_OSI_INSTALL_INCLUDE_DIR@")
+   set(OPEN_SIMULATION_INTERFACE_LIBRARIES "@PROJECT_NAME@")
+-  include("${CMAKE_CURRENT_LIST_DIR}/open_simulation_interface_targets.cmake")
++  include("${CMAKE_CURRENT_LIST_DIR}/open_simulation_interface-targets.cmake")
+ endif()
+EOF
+git -C ${ESMINI_BUILD_OSI_SOURCE_DIR} apply --whitespace=fix patch/asam-osi-cmake.patch
+fi
+
 cmake \
   -S ${ESMINI_BUILD_OSI_SOURCE_DIR} \
   -B ${ESMINI_BUILD_OSI_BUILD_DIR} \
