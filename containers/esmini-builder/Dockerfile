@@ -22,7 +22,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=${TARGETPLATFORM}
       sudo \
       curl \
       wget \
-      git \
+      git-core \
       jq \
       gnupg2 \
       ca-certificates \
