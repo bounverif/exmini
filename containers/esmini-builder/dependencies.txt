@@ -17,6 +17,10 @@ libxinerama-dev [builder platform:dpkg]
 libgl1-mesa-dev [builder platform:dpkg]
 libegl1-mesa-dev [builder platform:dpkg]
 libjpeg-dev [builder platform:dpkg]
+googletest [builder platform:dpkg]
+google-mock [builder platform:dpkg]
+libgtest-dev [builder platform:dpkg]
+libgmock-dev [builder platform:dpkg]
 
 # Devel dependencies
 git [devel platform:dpkg]
