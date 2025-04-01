@@ -58,6 +58,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=${TARGETPLATFORM}
     apt-get install -qy --no-install-recommends \
       doas \
       tini \
+      libgl1 \
+      libx11-6 \
+      libxrandr2 \
+      libxinerama1 \
+      libfontconfig1 \
       && \
     apt-get autoremove -y && rm -rf /var/lib/apt/lists/* && \
     echo "permit nopass ubuntu as root" >> /etc/doas.conf
