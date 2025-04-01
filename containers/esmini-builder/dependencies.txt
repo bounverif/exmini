@@ -21,6 +21,8 @@ googletest [builder platform:dpkg]
 google-mock [builder platform:dpkg]
 libgtest-dev [builder platform:dpkg]
 libgmock-dev [builder platform:dpkg]
+libpugixml-dev [builder platform:dpkg]
+libspdlog-dev [builder platform:dpkg]
 
 # Devel dependencies
 git [devel platform:dpkg]
