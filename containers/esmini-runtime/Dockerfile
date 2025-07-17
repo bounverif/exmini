@@ -37,6 +37,7 @@ RUN git clone https://github.com/esmini/esmini.git "${ESMINI_SOURCE_DIR}" && \
 # TODO: Install system dependencies from the cloned repository
 
 RUN cmake -S ${ESMINI_SOURCE_DIR} -B ${ESMINI_BUILD_DIR} \
+      -DDOWNLOAD_EXTERNALS=OFF \
       -DUSE_SUMO=${ESMINI_BUILD_USE_SUMO} \
       -DUSE_GTEST=${ESMINI_BUILD_USE_GTEST} \
       -DUSE_IMPLOT=${ESMINI_BUILD_USE_IMPLOT} \
