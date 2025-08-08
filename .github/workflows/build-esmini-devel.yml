@@ -1,11 +1,11 @@
-name: buildah-build-builder
+name: Container Build
 on:
   schedule:
     - cron: "19 19 * * 0" # 19:19 UTC every Sunday
   push:
     paths:
-      - containers/esmini-builder/**
-      - .github/workflows/buildah-build-builder.yml # Self-trigger
+      - containers/esmini-devel/**
+      - .github/workflows/build-esmini-devel.yml # Self-trigger
 
   workflow_dispatch:
     inputs:
@@ -14,7 +14,7 @@ on:
         type: string
         required: true
         default: latest
-        
+
 env:
   REGISTRY: ghcr.io/bounverif
   IMAGE_NAME: esmini
@@ -22,8 +22,6 @@ env:
   PLATFORM: linux-amd64
   ESMINI_VERSION: latest
   ESMINI_LATEST_VERSION: latest
-  # CONTAINERS_ROOT: /home/runner/.local/share/containers
-  # TMPDIR: /home/runner/.local/share/containers/tmp
 
 permissions:
   contents: read
@@ -80,10 +78,10 @@ jobs:
         id: build-builder
         uses: redhat-actions/buildah-build@v2
         with:
-          context: ./containers/esmini-builder
+          context: ./containers
           image: esmini
           tags: |
-            ${{ env.ESMINI_VERSION }}-builder 
+            ${{ env.ESMINI_VERSION }}-builder
             ${{ env.ESMINI_VERSION }}-builder-${{ env.PODMAN_ARCH }}
           layers: true
           oci: true
@@ -92,13 +90,13 @@ jobs:
           extra-args: |
             --target esmini-builder
           containerfiles: |
-            ./containers/esmini-builder/Dockerfile
+            ./containers/esmini-devel/Dockerfile
 
       - name: Build devel container image
         id: build-devel
         uses: redhat-actions/buildah-build@v2
         with:
-          context: ./containers/esmini-builder
+          context: ./containers
           image: esmini
           tags: ${{ env.ESMINI_VERSION }}-devel ${{ env.ESMINI_VERSION }}-devel-${{ env.PODMAN_ARCH }}
           layers: true
@@ -108,7 +106,7 @@ jobs:
           extra-args: |
             --target esmini-devel
           containerfiles: |
-            ./containers/esmini-builder/Dockerfile
+            ./containers/esmini-devel/Dockerfile
 
       - name: Push to GitHub Container Repository
         if: github.ref == 'refs/heads/main'
@@ -179,7 +177,7 @@ jobs:
           done
           buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-builder
           if [ "${{ env.ESMINI_VERSION }}" == "${{ env.ESMINI_LATEST_VERSION }}" ]; then
-            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-builder 
+            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-builder
           fi
 
       - name: Create and push manifest list for esmini-devel
@@ -193,5 +191,5 @@ jobs:
           done
           buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:${{ env.ESMINI_VERSION }}-devel
           if [ "${{ env.ESMINI_VERSION }}" == "${{ env.ESMINI_LATEST_VERSION }}" ]; then
-            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-devel 
+            buildah manifest push --all $MANIFEST docker://$FULL_IMAGE_NAME:latest-devel
           fi
