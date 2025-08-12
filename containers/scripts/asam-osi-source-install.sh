@@ -44,4 +44,4 @@ cmake \
 cmake --build ${ESMINI_OSI_BUILD_DIR} --target install
 
 # Cleanup
-# rm -rf ${ESMINI_OSI_SOURCE_DIR} ${ESMINI_OSI_BUILD_DIR}
+rm -rf ${ESMINI_OSI_SOURCE_DIR} ${ESMINI_OSI_BUILD_DIR}
