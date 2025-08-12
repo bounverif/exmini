@@ -1,13 +1,17 @@
 {
-  "name": "esmini",
-  "build": {
-    "context": ".",
-    "dockerfile": "Dockerfile",
-    "args": {
-      "ESMINI_IMAGE_NAME": "ghcr.io/bounverif/esmini",
-      "ESMINI_VERSION": "latest"
-    },
-    "target": "devcontainer"
+  "name": "Bazalt Esmini",
+  "image": "ghcr.io/bounverif/bazalt:latest-devel",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "EditorConfig.EditorConfig",
+        "esbenp.prettier-vscode"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true
+      }
+    }
   },
-  "remoteUser": "ubuntu"
+  "postCreateCommand": "pre-commit install"
 }
